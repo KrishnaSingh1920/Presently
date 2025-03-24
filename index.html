@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Presently - Attendance Calculator</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Presently is a smart attendance calculator that helps you determine how many extra classes you need to attend (or skip) to meet your required attendance percentage.">
+  <meta name="keywords" content="Attendance Calculator, Presently, class attendance, attendance percentage, attendance tracker">
+  <meta name="author" content="Krishna Singh">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Open Graph Meta Tags for Social Sharing -->
+  <meta property="og:title" content="Presently - Attendance Calculator">
+  <meta property="og:description" content="Calculate the number of extra classes you need to attend or skip to meet your required attendance percentage with Presently.">
+  <meta property="og:image" content="logo.png">
+  <meta property="og:type" content="website">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.png" type="image/png">
+  
+  <style>
+    /* Dark Mode (Default) Variables */
+    :root {
+      --bg-color: #1a1a1a;         /* Solid dark background */
+      --form-bg: #2a2a2a;           /* Form background in dark mode */
+      --title-texts: linear-gradient(45deg, #ff0000, #ffd2d1);
+      --text-color: white;
+      --btn-color: #ff0000;
+      --btn-color-hover: #ffffff;
+      --toggle: #ff4141;
+      --footer-bg: rgba(128, 128, 128, 0.5); /* Transparent grey */
+      --footer-text: white;
+    }
+    
+    /* Light Theme Overrides */
+    body.light-theme {
+      --bg-color: #f0ffff;         /* Solid light background */
+      --form-bg: #e0ffff;           /* Form background in light mode */
+      --title-texts: linear-gradient(45deg, #78ffff, #293a3a);
+      --text-color: black;
+      --btn-color: #00ffea;
+      --btn-color-hover: #333333;
+      --toggle: #4bfff0;
+      --footer-bg: rgba(0, 255, 255, 0.5); /* Cyanish tint */
+      --footer-text: black;
+    }
+    
+    /* Global Reset & Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Times New Roman', Times, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.5s ease, color 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 50px;
+      position: relative;
+    }
+    
+    p {
+      margin: 5px;
+    }
+    
+    /* Dark/Light Mode Toggle Button */
+    #toggleDarkMode {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      top: 25px;
+      right: 25px;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--toggle);
+      background-image: url("https://img.icons8.com/?size=100&id=rToM37ffxtqd&format=png&color=000000");
+      background-size: 100% 100%;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      z-index: 1000;
+    }
+    
+    #toggleDarkMode:hover {
+      background-color: white;
+    }
+    
+    /* Gradient Text for Headings */
+    h1, h2, h3 {
+      background: var(--title-texts);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 20px;
+      transition: background 0.5s ease;
+    }
+    h1{
+      font-size: 48px;
+    }
+    
+    /* Form Styling – Bigger Container */
+    form {
+      background-color: var(--form-bg);
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      width: 80vw;
+      max-width: 600px;
+      height: auto;
+      margin-bottom: 30px;
+      transition: background-color 0.5s ease;
+    }
+    
+    /* Flex Container for Each Label & Input */
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    
+    .form-group label {
+      width: 40%;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    
+    .form-group input[type="number"] {
+      width: 60%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--btn-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    button[type="submit"]:hover {
+      background-color: var(--btn-color-hover);
+      color: var(--btn-color);
+    }
+    
+    /* Result Box Styling with Fade-In Animation */
+    #result {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 8px;
+      min-width: 500px;
+      text-align: center;
+      font-size: 18px;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: dropdownFadeIn 0.8s forwards;
+    }
+    
+    /* Error Box Styling */
+    .error {
+      background-color: #ff6969;
+      color: white;
+      border: 1px solid #ff0000;
+    }
+    
+    /* Colors for Result Box based on Attendance */
+    .low {
+      background-color: #ff4d4d;
+      color: #000000;
+    }
+    
+    .exact {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+    
+    .high {
+      background-color: #ccffcc;
+      color: #006600;
+    }
+    
+    /* Fade-In Animation */
+    @keyframes dropdownFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Footer Styling */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      background-color: var(--footer-bg);
+      color: var(--footer-text);
+      font-size: 14px;
+      position: absolute;
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <button id="toggleDarkMode"></button>
+  <h1>Presently</h1>
+  <form id="attendanceForm">
+    <div class="form-group">
+      <label for="presentDays">Number of Classes Attended:</label>
+      <input type="number" id="presentDays" min="0" required>
+    </div>
+    <div class="form-group">
+      <label for="totalClasses">Total Number of Classes:</label>
+      <input type="number" id="totalClasses" min="1" required>
+    </div>
+    <div class="form-group">
+      <label for="requiredPercentage">Required Attendance (%):</label>
+      <input type="number" id="requiredPercentage" min="0" max="100" required>
+    </div>
+    <button type="submit">Calculate</button>
+  </form>
+  
+  <div id="result"></div>
+  
+  <footer>
+    &copy; 2025 Presently by Krishna Singh. All rights reserved.
+  </footer>
+  
+  <script>
+    const form = document.getElementById('attendanceForm');
+    const resultDiv = document.getElementById('result');
+    const toggleDarkModeButton = document.getElementById('toggleDarkMode');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Parse user inputs
+      const presentDays = parseInt(document.getElementById('presentDays').value);
+      const totalClasses = parseInt(document.getElementById('totalClasses').value);
+      const reqPercent = parseFloat(document.getElementById('requiredPercentage').value);
+
+      // Error checking:
+      // If required attendance is 0%, it's not valid.
+      if (reqPercent === 0) {
+        resultDiv.style.animation = 'none';
+        void resultDiv.offsetWidth;
+        resultDiv.style.animation = 'dropdownFadeIn 0.8s forwards';
+        resultDiv.className = 'error';
+        resultDiv.innerHTML = `<p>Error: Required attendance percentage cannot be 0%.</p>`;
+        return;
+      }
+
+      // If number of classes attended is greater than total classes, display error.
+      if (presentDays > totalClasses) {
+        resultDiv.style.animation = 'none';
+        void resultDiv.offsetWidth;
+        resultDiv.style.animation = 'dropdownFadeIn 0.8s forwards';
+        resultDiv.className = 'error';
+        resultDiv.innerHTML = `<p>Error: Number of classes attended cannot exceed total classes.</p>`;
+        return;
+      }
+
+      // Improved logic: If current attendance is below the required percentage,
+      // calculate the minimum extra classes (x) to be attended such that:
+      // (presentDays + x) / (totalClasses + x) >= (reqPercent / 100)
+      // Solving for x gives:
+      // x >= ((reqPercent/100)*totalClasses - presentDays) / (1 - (reqPercent/100))
+      let message = '';
+      let extraInfo = '';
+
+      // Reset previous animation
+      resultDiv.style.animation = 'none';
+      void resultDiv.offsetWidth;
+      resultDiv.style.animation = 'dropdownFadeIn 0.8s forwards';
+
+      if (presentDays < (reqPercent / 100) * totalClasses) {
+        // For reqPercent < 100
+        const extraNeeded = Math.ceil(((reqPercent / 100) * totalClasses - presentDays) / (1 - (reqPercent / 100)));
+        message = `Current attendance: ${((presentDays / totalClasses) * 100).toFixed(2)}%. <br>
+                   Your attendance is too low.`;
+        extraInfo = `You need to attend ${extraNeeded} extra class${extraNeeded === 1 ? '' : 'es'}, 
+                   which will make your new attendance ${(((presentDays + extraNeeded) / (totalClasses + extraNeeded)) * 100).toFixed(2)}%.`;
+        resultDiv.className = 'low';
+      } else if (presentDays > (reqPercent / 100) * totalClasses) {
+        // Calculate how many classes you can afford to skip
+        const canSkip = Math.floor((presentDays * 100 / reqPercent) - totalClasses);
+        message = `Current attendance: ${((presentDays / totalClasses) * 100).toFixed(2)}%. <br>
+                   Your attendance is more than required.`;
+        extraInfo = `You can afford to skip up to ${canSkip} class${canSkip === 1 ? '' : 'es'} and still maintain at least ${reqPercent}%.`;
+        resultDiv.className = 'high';
+      } else {
+        message = `Current attendance: ${((presentDays / totalClasses) * 100).toFixed(2)}%. <br>
+                   Your attendance is exactly at the required level.`;
+        extraInfo = `Keep it up to maintain your attendance.`;
+        resultDiv.className = 'exact';
+      }
+
+      resultDiv.innerHTML = `<p>${message}</p><p>${extraInfo}</p>`;
+    });
+
+    // Toggle between dark (default) and light themes with smooth transition
+    toggleDarkModeButton.addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+    });
+  </script>
+</body>
+</html>
